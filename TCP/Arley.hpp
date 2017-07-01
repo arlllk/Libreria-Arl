@@ -71,7 +71,11 @@ namespace consola
 
 	void InitConsole();
 
+	bool ColorLine(WORD, WORD);
+
 	std::wstring GetString();
+
+	bool CenterPrint(std::wstring , WORD , WORD , bool);
 
 	inline void InitConsole()
 	{
@@ -111,7 +115,7 @@ namespace consola
 		WriteConsoleW(ConsOut, Str.c_str(), static_cast<DWORD>(Str.length()), &Nm, nullptr);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
-	inline bool CenterPrint(std::wstring Str, WORD Col, WORD bCol) {
+	inline bool CenterPrint(std::wstring Str, WORD Col, WORD bCol, bool colorization=true) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, Col | bCol);
 		COORD position = csbiInfo.dwCursorPosition;
@@ -121,9 +125,27 @@ namespace consola
 		position.X = ConSize.X / 2 - (StrSize / 2);
 		SetConsoleCursorPosition(ConsOut, position);
 		WriteConsoleW(ConsOut, Str.c_str(), Str.length(), &Nm, nullptr);
+		if (colorization)
+		{
+			ColorLine(Col, bCol);
+		}
 		position.Y++;
 		SetConsoleCursorPosition(ConsOut, position);
 		return Str.length() == static_cast<size_t>(Nm);
+	}
+
+	inline bool ColorLine(WORD Col, WORD bCol)
+	{
+		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
+		COORD position = csbiInfo.dwCursorPosition;
+		position.X = 0;
+		COORD ConSize = csbiInfo.dwSize;
+		DWORD Nm = 0;
+		DWORD dwConSize = csbiInfo.dwSize.X;
+		//FillConsoleOutputCharacterW(ConsOut, L' ', dwConSize, position, &Nm);
+		FillConsoleOutputAttribute(ConsOut, Col | bCol, dwConSize, position, &Nm);
+		SetConsoleCursorPosition(ConsOut, position);
+		return dwConSize == Nm;
 	}
 
 	inline bool SetTitle(std::wstring Titulo) {
@@ -149,7 +171,7 @@ namespace consola
 		std::wcin.ignore(INT_MAX, '\n');
 		std::wcin.get();
 	}
-
+	
 	
 }
 
@@ -219,9 +241,8 @@ namespace Menus
 		void SetConsoleTitlebackgroundColor(int Col) { consoleTitleColorb = Col; }
 		void SetConsoleErrorbackgroundColor(int Col) { consoleErrorColorb = Col; }
 		void SetConsoleOptionbackgroundColor(int Col) { consoleErrorColorb = Col; }
-	protected:
 		std::wstring GetTitle() { return Title; }
-	private:
+	protected:
 		std::wstring Title = L"Menu:";
 		std::wstring ErrorOut = L"Valor incorrecto";
 		std::wstring InicioOp = L"N.";
@@ -236,9 +257,81 @@ namespace Menus
 	class Pantalla: public Menu
 	{
 	public:
-		using Menu::SetTitle;
-		void SetTitle(std::wstring text) { Menu::Title = text; }
+		void SetTitle(std::wstring text) { Title = text; }
+		void print(bool center=false)
+		{
+			while (true)
+			{
+				consola::cls();
+				consola::CenterPrint(Title, consoleTitleColor, consoleTitleColorb);
+				{
+					GetConsoleScreenBufferInfo(consola::ConsOut, &consola::csbiInfo);
+					COORD Start = consola::csbiInfo.dwCursorPosition;
+					consola::Goto(0, Start.Y + 2);
+				}
+				if (center) {
+					for (auto r : *this) {
+						consola::CenterPrint(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
+					}
+				}else{
+					for (auto r : *this) {
+						consola::printLn(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
+					}
+				}
+				std::wstring Tmp;
+				bool Failbool = false;
+
+				Tmp = consola::GetString();
+				if (center)
+				{
+					for (auto a : Tmp)
+					{
+						if (!isdigit(a))
+						{
+							consola::CenterPrint(ErrorOut, consoleErrorColor, consoleErrorColorb );
+							consola::CenterPrint(L"No es un numero correcto", consoleErrorColor, consoleErrorColorb);
+							consola::Wait();
+							Failbool = true;
+						}
+					}
+				}
+				else {
+					for (auto a : Tmp)
+					{
+						if (!isdigit(a))
+						{
+							consola::printLn(ErrorOut, consoleErrorColor, consoleErrorColorb);
+							consola::printLn(L"No es un numero correcto", consoleErrorColor, consoleErrorColorb);
+							consola::Wait();
+							Failbool = true;
+						}
+					}
+				}
+				if (Failbool)
+				{
+					continue;
+				}
+				int Op = stoi(Tmp);
+				bool correctOp = false;
+				for (auto r : *this) {
+					correctOp = false;
+					if (std::get<0>(r) == Op) {
+						consola::cls();
+						std::get<2>(r)();
+						correctOp = true;
+						break;
+					}
+				}
+				if (!correctOp) {
+					consola::printLn(ErrorOut, consoleErrorColor, consoleErrorColorb);
+					consola::Wait();
+					continue;
+				}
+				break;
+			}
+		}
 	private:
+		DWORD consoleTitleColor = consola::ForColor::DARKRED;
 		DWORD consoleTitleColorb = consola::BackColor::bYELLOW;
 		DWORD ConsoleBackgroundColor = consola::BackColor::bBLUE;
 		DWORD consoleErrorColor = consola::ForColor::WHITE;
