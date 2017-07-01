@@ -37,10 +37,49 @@ void MenuModAdd(vector<tuple<uint8_t, wstring, function<void()>>> &Menu, uint8_t
 
 void printModMenu(vector<tuple<uint8_t, wstring, function<void()>>> &Menu)
 {
+
+	while (true)
+{
 	for (Menus::MENU_t V : Menu)
-	{
-		printLn(L"N." + to_wstring(get<0>(V)) + L"\t" + get<1>(V), consola::ForColor::WHITE, consola::BackColor::bBLACK);
-	}
+		{
+			printLn(L"N." + to_wstring(get<0>(V)) + L"\t" + get<1>(V), consola::ForColor::WHITE, consola::BackColor::bBLACK);
+		}
+		std::wstring Tmp;
+		bool Failbool = false;
+	
+		Tmp = consola::GetString();
+		for (auto a : Tmp)
+		{
+			if (!isdigit(a))
+			{
+				printLn(L"Valor incorrecto", consola::ForColor::RED, consola::BackColor::bBLACK);
+				printLn(L"No es un numero correcto", consola::ForColor::RED, consola::BackColor::bBLACK);
+				consola::Wait();
+				Failbool = true;
+			}
+		}
+		if (Failbool)
+		{
+			continue;
+		}
+		int Op = stoi(Tmp);
+		bool correctOp = false;
+		for (auto r : Menu) {
+			correctOp = false;
+			if (get<0>(r) == Op) {
+				consola::cls();
+				get<2>(r)();
+				correctOp = true;
+				break;
+			}
+		}
+		if (!correctOp) {
+			printLn(L"Valor incorrecto", consola::ForColor::RED, consola::BackColor::bBLACK);
+			consola::Wait();
+			continue;
+		}
+		break;
+}
 }
 
 void solucionModular() {
@@ -61,6 +100,7 @@ void solucionOOP() {
 	MenuOOP.add(1, L"Opcion 1", opcion1);
 	MenuOOP.add(2, L"Opcion 2", opcion2);
 	MenuOOP.add(3, L"Opcion 3", opcion3);
+	MenuOOP.print();
 
 }
 

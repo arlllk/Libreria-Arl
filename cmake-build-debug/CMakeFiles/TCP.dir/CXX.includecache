@@ -7,6 +7,8 @@
 #IncludeRegexTransform: 
 
 C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/Arley.hpp
+stdafx.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.h
 Windows.h
 -
 string
