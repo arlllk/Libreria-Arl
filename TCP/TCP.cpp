@@ -71,7 +71,7 @@ int main()
 	Menu.SetTitle(L"Que tipo de programa quiere ejecutar");
 	Menu.add(1, L"Por programacion Modular y estructurada", solucionModular);
 	Menu.add(2, L"Por programacion via OPP", solucionOOP);
-	Menu.print(true);
+	Menu.print();
 	consola::Wait();
 	return 0;
 }

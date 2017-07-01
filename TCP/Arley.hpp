@@ -61,7 +61,7 @@ namespace consola
 
 	bool SetTitle(std::wstring);
 
-	void cls();
+	void cls(WORD, WORD);
 
 	void Goto(short, short);
 
@@ -105,6 +105,7 @@ namespace consola
 		WriteConsoleW(ConsOut, Str.c_str(), static_cast<DWORD>(Str.length()), &Nm, nullptr);
 		Start.Y++;
 		SetConsoleCursorPosition(ConsOut, Start);
+		SetConsoleTextAttribute(ConsOut, WHITE | bBLACK);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
 
@@ -131,6 +132,7 @@ namespace consola
 		}
 		position.Y++;
 		SetConsoleCursorPosition(ConsOut, position);
+		SetConsoleTextAttribute(ConsOut, WHITE | bBLACK);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
 
@@ -145,6 +147,7 @@ namespace consola
 		//FillConsoleOutputCharacterW(ConsOut, L' ', dwConSize, position, &Nm);
 		FillConsoleOutputAttribute(ConsOut, Col | bCol, dwConSize, position, &Nm);
 		SetConsoleCursorPosition(ConsOut, position);
+		SetConsoleTextAttribute(ConsOut, WHITE | bBLACK);
 		return dwConSize == Nm;
 	}
 
@@ -152,14 +155,14 @@ namespace consola
 		return (SetConsoleTitleW(Titulo.c_str()));
 	}
 
-	inline void cls() {
+	inline void cls(WORD Col=WHITE, WORD bCol=bBLACK) {
 		COORD coordScreen = { 0, 0 };
 		DWORD cCharsWritten;
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		DWORD dwConSize = csbiInfo.dwSize.X * csbiInfo.dwSize.Y;
 		FillConsoleOutputCharacterW(ConsOut, L' ', dwConSize, coordScreen, &cCharsWritten);
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
-		FillConsoleOutputAttribute(ConsOut, csbiInfo.wAttributes, dwConSize, coordScreen, &cCharsWritten);
+		FillConsoleOutputAttribute(ConsOut, Col | bCol, dwConSize, coordScreen, &cCharsWritten);
 		SetConsoleCursorPosition(ConsOut, coordScreen);
 	}
 
