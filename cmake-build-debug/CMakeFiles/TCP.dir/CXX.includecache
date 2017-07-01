@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/Arley.hpp
+Windows.h
+-
+string
+-
+functional
+-
+vector
+-
+iostream
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/TCP.cpp
+stdafx.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.h
+Arley.hpp
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/Arley.hpp
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.cpp
+stdafx.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.h
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.h
+targetver.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/targetver.h
+stdio.h
+-
+tchar.h
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/targetver.h
+SDKDDKVer.h
+-
+
