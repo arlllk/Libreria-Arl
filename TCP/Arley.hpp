@@ -11,6 +11,9 @@
 #include <cstdint>
 #include <any>
 
+#if (__cplusplus < 201402L)
+//static_assert(false, "Se necesita usar el C++17 para este header");
+#endif
 /**
  * \brief Namespace para funciones usadas para consola de Windows
  */
@@ -62,7 +65,7 @@ namespace consola
 
 	bool printLn(const std::wstring Str = L"\n", const WORD col = WHITE, const WORD bCol = bBLACK);
 
-	bool printLn(const std::string Str ="\n", const WORD col = WHITE, const WORD bCol = bBLACK);
+	bool printLn(std::string Str ="\n", WORD col = WHITE, WORD bCol = bBLACK);
 
 	bool SetTitle(const std::wstring);
 
@@ -94,6 +97,7 @@ namespace consola
 		std::wcin.ignore(LLONG_MAX, '\n');
 		return regreso;
 	}
+
 	template< typename T>
 	T getType (const std::wstring Pedido, const T minVal = std::numeric_limits<T>::lowest(), const T maxVal = std::numeric_limits<T>::max(), const std::wstring Error = L"El valor ingresado no es correcto"){
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
@@ -113,15 +117,23 @@ namespace consola
 					fl = true;
 				}
 			}
+			auto Number = std::stof(Ingreso);
+			if (Number<minVal || Number>maxVal)
+			{
+				printLn(Error, RED);
+				printLn(std::to_wstring(Number) + std::wstring(L"Esta fuera del rango de ") + std::to_wstring(minVal) + std::wstring(L" A ") + std::to_wstring(maxVal));
+				fl = true;
+			}
 			if (fl)
 			{
 				continue;
 			}
 			break;
 		}
-		return std::stold(Ingreso);
+		return static_cast<T>(stold(Ingreso));
 	}
 
+	[[deprecated("replaced by getType, much better template code")]]
 	inline long double GetNumber(const std::wstring Pedido, const std::wstring Error=L"El valor ingresado no es correcto")
 	{
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
@@ -189,7 +201,7 @@ namespace consola
 		return SetConsoleOutputCP(CP_UTF8);
 	}
 
-	inline bool printLn(const std::string Str ="\n", const WORD col = WHITE, const WORD bCol = bBLACK)
+	inline bool printLn(std::string Str,  WORD col,  WORD bCol)
 	{
 		std::wstring wStr(Str.begin(), Str.end());
 		return printLn(wStr,col,bCol);
@@ -358,8 +370,9 @@ namespace Menus
 		DWORD consoleOptionColor = consola::ForColor::WHITE;
 		DWORD consoleOptionColorb = consola::BackColor::bBLACK;
 	};
+
 	template <typename... Ts>
-	class Pantalla<Ts...>: public Menu<Ts...>
+	class Pantalla: protected Menu<Ts...>
 	{
 	public:
 		void SetTitle(const std::wstring text) { Title = text; }
