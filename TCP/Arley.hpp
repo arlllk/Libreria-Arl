@@ -2,12 +2,14 @@
 #if defined (_MSC_VER)
 	#include "stdafx.h"
 #endif
+#define NOMINMAX
 #include <Windows.h>
 #include <string>
 #include <functional>
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <any>
 
 /**
  * \brief Namespace para funciones usadas para consola de Windows
@@ -92,8 +94,35 @@ namespace consola
 		std::wcin.ignore(LLONG_MAX, '\n');
 		return regreso;
 	}
+	template< typename T>
+	T getType (const std::wstring Pedido, const T minVal = std::numeric_limits<T>::lowest(), const T maxVal = std::numeric_limits<T>::max(), const std::wstring Error = L"El valor ingresado no es correcto"){
+		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
+		std::wstring Ingreso;
+		while (true)
+		{
+			cls();
+			printLn(Pedido);
+			Ingreso = GetString();
+			for (wchar_t a : Ingreso)
+			{
+				auto check = static_cast<unsigned char>(a);
+				if (!(isdigit(check) ||a == L'.'|| a==L','))
+				{
+					printLn(Error, RED);
+					printLn(std::to_wstring(a) + std::wstring(L" No es un digito"), RED);		//Now only a ugly one
+					fl = true;
+				}
+			}
+			if (fl)
+			{
+				continue;
+			}
+			break;
+		}
+		return std::stold(Ingreso);
+	}
 
-	inline float GetNumber(const std::wstring Pedido, const std::wstring Error=L"El valor ingresado no es correcto")
+	inline long double GetNumber(const std::wstring Pedido, const std::wstring Error=L"El valor ingresado no es correcto")
 	{
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
 		std::wstring Ingreso;
@@ -102,9 +131,9 @@ namespace consola
 			cls();
 			printLn(Pedido);
 			Ingreso = GetString();
-			for (auto a: Ingreso)
+			for (wchar_t a: Ingreso)
 			{
-				if (!(isdigit(a)))
+				if (!(isdigit(a)||(a==L'.')))
 				{
 					printLn(Error,RED);
 					printLn(std::to_wstring(a)+std::wstring(L" No es un digito"),RED);		//Now only a ugly one
@@ -117,7 +146,7 @@ namespace consola
 			}
 			break;
 		}
-		return std::stof(Ingreso);
+		return std::stold(Ingreso);
 	}
 
 	inline float GetNumberRanged(const std::wstring Pedido, const float minVal= -FLT_MAX, const float maxVal = FLT_MAX, const std::wstring Error= L"El valor ingresado no es correcto")
@@ -253,9 +282,10 @@ namespace Menus
 {
 	typedef std::tuple<uint8_t, std::wstring, std::function<void()>> MENU_t;
 	typedef std::vector<MENU_t> MENU_v;
-	class Menu : protected std::vector<std::tuple<uint8_t, std::wstring, std::function<void(void)>>> {
+	template <typename... Ts>
+	class Menu : protected std::vector<std::tuple<uint8_t, std::wstring, std::function<void(Ts...)>>> {
 	public:
-		void add(const uint8_t Number, const std::wstring string, const std::function<void(void)> functionX)
+		void add(const uint8_t Number, const std::wstring string, const std::function<void(Ts...)> functionX)
 		{
 			this->push_back(make_tuple(Number, string, functionX));
 		}
@@ -328,7 +358,8 @@ namespace Menus
 		DWORD consoleOptionColor = consola::ForColor::WHITE;
 		DWORD consoleOptionColorb = consola::BackColor::bBLACK;
 	};
-	class Pantalla: public Menu
+	template <typename... Ts>
+	class Pantalla<Ts...>: public Menu<Ts...>
 	{
 	public:
 		void SetTitle(const std::wstring text) { Title = text; }
