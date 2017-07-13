@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include <iostream>
+#include <cstdint>
 
 /**
  * \brief Namespace para funciones usadas para consola de Windows
@@ -55,27 +56,27 @@ namespace consola
 
 	bool SetUnicode();
 
-	bool print(std::wstring, WORD Col = WHITE, WORD bCol = bBLACK);
+	bool print(const std::wstring, const WORD Col = WHITE, const WORD bCol = bBLACK);
 
-	bool printLn(std::wstring Str = L"\n", WORD col = WHITE, WORD bCol = bBLACK);
+	bool printLn(const std::wstring Str = L"\n", const WORD col = WHITE, const WORD bCol = bBLACK);
 
-	bool SetTitle(std::wstring);
+	bool printLn(const std::string Str ="\n", const WORD col = WHITE, const WORD bCol = bBLACK);
 
-	void cls(WORD, WORD);
+	bool SetTitle(const std::wstring);
 
-	void Goto(short, short);
+	void cls(const WORD Col = WHITE,const  WORD bCol = bBLACK);
+
+	void Goto(const short, const short);
 
 	void Wait();
 
-	void ReadLn(std::wstring);
-
 	void InitConsole();
 
-	bool ColorLine(WORD, WORD);
+	bool ColorLine(const WORD, const WORD);
 
 	std::wstring GetString();
 
-	bool CenterPrint(std::wstring , WORD , WORD , bool);
+	bool CenterPrint(const std::wstring , const WORD , const WORD ,const bool);
 
 	inline void InitConsole()
 	{
@@ -88,15 +89,84 @@ namespace consola
 	{
 		std::wstring regreso;
 		std::wcin >> regreso;
-		std::wcin.ignore(INT_MAX, '\n');
+		std::wcin.ignore(LLONG_MAX, '\n');
 		return regreso;
 	}
+
+	inline float GetNumber(const std::wstring Pedido, const std::wstring Error=L"El valor ingresado no es correcto")
+	{
+		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
+		std::wstring Ingreso;
+		while (true)
+		{
+			cls();
+			printLn(Pedido);
+			Ingreso = GetString();
+			for (auto a: Ingreso)
+			{
+				if (!(isdigit(a)))
+				{
+					printLn(Error,RED);
+					printLn(std::to_wstring(a)+std::wstring(L" No es un digito"),RED);		//Now only a ugly one
+					fl = true;
+				}
+			}
+			if (fl)
+			{
+				continue;
+			}
+			break;
+		}
+		return std::stof(Ingreso);
+	}
+
+	inline float GetNumberRanged(const std::wstring Pedido, const float minVal= -FLT_MAX, const float maxVal = FLT_MAX, const std::wstring Error= L"El valor ingresado no es correcto")
+	{
+		
+		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
+		std::wstring Ingreso;
+		while (true)
+		{
+			cls();
+			printLn(Pedido);
+			Ingreso = GetString();
+			for (auto a : Ingreso)
+			{
+				if (!(isdigit(a)))
+				{
+					printLn(Error, RED);
+					printLn(a + std::wstring(L" No es un digito"), RED);		//Now only a ugly one
+					fl = true;
+				}
+			}
+			float Number = std::stof(Ingreso);
+			if (Number<minVal||Number>maxVal)
+			{
+				printLn(Error, RED);
+				printLn(std::to_wstring(Number) + std::wstring(L"Esta fuera del rango de ") + std::to_wstring(minVal) + std::wstring(L" A ") + std::to_wstring(maxVal));
+				fl = true;
+			}
+			if (fl)
+			{
+				continue;
+			}
+			break;
+		}
+		return std::stof(Ingreso);
+	}
+
 
 	inline bool SetUnicode() {
 		return SetConsoleOutputCP(CP_UTF8);
 	}
 
-	inline bool printLn(std::wstring Str, WORD col, WORD bCol) {
+	inline bool printLn(const std::string Str ="\n", const WORD col = WHITE, const WORD bCol = bBLACK)
+	{
+		std::wstring wStr(Str.begin(), Str.end());
+		return printLn(wStr,col,bCol);
+	}
+
+	inline bool printLn(const std::wstring Str, const WORD col, const WORD bCol) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, col | bCol);
 		COORD Start = csbiInfo.dwCursorPosition;
@@ -109,14 +179,14 @@ namespace consola
 		return Str.length() == static_cast<size_t>(Nm);
 	}
 
-	inline bool print(std::wstring Str, WORD Col, WORD bCol) {
+	inline bool print(const std::wstring Str, const WORD Col, const WORD bCol) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, Col | bCol);
 		DWORD Nm = 0;
 		WriteConsoleW(ConsOut, Str.c_str(), static_cast<DWORD>(Str.length()), &Nm, nullptr);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
-	inline bool CenterPrint(std::wstring Str, WORD Col, WORD bCol, bool colorization=true) {
+	inline bool CenterPrint(const std::wstring Str, const WORD Col, const WORD bCol, const bool colorization=true) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, Col | bCol);
 		COORD position = csbiInfo.dwCursorPosition;
@@ -136,12 +206,12 @@ namespace consola
 		return Str.length() == static_cast<size_t>(Nm);
 	}
 
-	inline bool ColorLine(WORD Col, WORD bCol)
+	inline bool ColorLine(const WORD Col,const WORD bCol)
 	{
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
-		COORD position = csbiInfo.dwCursorPosition;
+		auto position = csbiInfo.dwCursorPosition;
 		position.X = 0;
-		COORD ConSize = csbiInfo.dwSize;
+		//auto ConSize = csbiInfo.dwSize;
 		DWORD Nm = 0;
 		DWORD dwConSize = csbiInfo.dwSize.X;
 		//FillConsoleOutputCharacterW(ConsOut, L' ', dwConSize, position, &Nm);
@@ -151,11 +221,11 @@ namespace consola
 		return dwConSize == Nm;
 	}
 
-	inline bool SetTitle(std::wstring Titulo) {
+	inline bool SetTitle(const std::wstring Titulo) {
 		return (SetConsoleTitleW(Titulo.c_str()));
 	}
 
-	inline void cls(WORD Col=WHITE, WORD bCol=bBLACK) {
+	inline void cls(const WORD Col,const WORD bCol) {
 		COORD coordScreen = { 0, 0 };
 		DWORD cCharsWritten;
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
@@ -166,13 +236,14 @@ namespace consola
 		SetConsoleCursorPosition(ConsOut, coordScreen);
 	}
 
-	inline void Goto(short X, short Y) {
+	inline void Goto(const short X,const short Y) {
 		COORD N; N.X = X; N.Y = Y;
 		SetConsoleCursorPosition(ConsOut, N);
 	}
 	inline void Wait() {
 		std::wcin.ignore(INT_MAX, '\n');
-		std::wcin.get();
+		//getchar();
+		//std::wcin.get();
 	}
 	
 	
@@ -182,9 +253,9 @@ namespace Menus
 {
 	typedef std::tuple<uint8_t, std::wstring, std::function<void()>> MENU_t;
 	typedef std::vector<MENU_t> MENU_v;
-	class Menu : public std::vector<std::tuple<uint8_t, std::wstring, std::function<void(void)>>> {
+	class Menu : protected std::vector<std::tuple<uint8_t, std::wstring, std::function<void(void)>>> {
 	public:
-		void add(uint8_t Number, std::wstring string, std::function<void(void)> functionX)
+		void add(const uint8_t Number, const std::wstring string, const std::function<void(void)> functionX)
 		{
 			this->push_back(make_tuple(Number, string, functionX));
 		}
@@ -234,16 +305,16 @@ namespace Menus
 				break;
 			}
 		}
-		void SetTitle(std::wstring text) { Title = text + L":"; }
-		void SetError(std::wstring text) { ErrorOut = text; }
-		void SetInicioOption(std::wstring text) { InicioOp = text; }
-		void SetSeparatorOption(std::wstring text) { SeparacionOp = text; }
-		void SetConsoleTitleColor(int Col) { consoleTitleColor = Col; }
-		void SetConsoleErrorColor(int Col) { consoleErrorColor = Col; }
-		void SetConsoleOptionColor(int Col) { consoleOptionColor = Col; }
-		void SetConsoleTitlebackgroundColor(int Col) { consoleTitleColorb = Col; }
-		void SetConsoleErrorbackgroundColor(int Col) { consoleErrorColorb = Col; }
-		void SetConsoleOptionbackgroundColor(int Col) { consoleErrorColorb = Col; }
+		void SetTitle(const std::wstring text) { Title = text + L":"; }
+		void SetError(const std::wstring text) { ErrorOut = text; }
+		void SetInicioOption(const std::wstring text) { InicioOp = text; }
+		void SetSeparatorOption(const std::wstring text) { SeparacionOp = text; }
+		void SetConsoleTitleColor(const int Col) { consoleTitleColor = Col; }
+		void SetConsoleErrorColor(const int Col) { consoleErrorColor = Col; }
+		void SetConsoleOptionColor(const int Col) { consoleOptionColor = Col; }
+		void SetConsoleTitlebackgroundColor(const int Col) { consoleTitleColorb = Col; }
+		void SetConsoleErrorbackgroundColor(const int Col) { consoleErrorColorb = Col; }
+		void SetConsoleOptionbackgroundColor(const int Col) { consoleErrorColorb = Col; }
 		std::wstring GetTitle() { return Title; }
 	protected:
 		std::wstring Title = L"Menu:";
@@ -260,8 +331,8 @@ namespace Menus
 	class Pantalla: public Menu
 	{
 	public:
-		void SetTitle(std::wstring text) { Title = text; }
-		void print(bool center=false)
+		void SetTitle(const std::wstring text) { Title = text; }
+		void print(const bool center=false)
 		{
 			while (true)
 			{
