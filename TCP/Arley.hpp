@@ -86,7 +86,7 @@ namespace consola
 
 	std::wstring GetString();
 
-	bool CenterPrint(const std::wstring, const WORD, const WORD, const bool);
+	bool CenterPrint(const std::wstring, const WORD col = WHITE, const WORD bCol = bBLACK, const bool colorization = true);
 
 	inline void InitConsole()
 	{
@@ -236,7 +236,7 @@ namespace consola
 		WriteConsoleW(ConsOut, Str.c_str(), static_cast<DWORD>(Str.length()), &Nm, nullptr);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
-	inline bool CenterPrint(const std::wstring Str, const WORD Col, const WORD bCol, const bool colorization = true) {
+	inline bool CenterPrint(const std::wstring Str, const WORD Col, const WORD bCol, const bool colorization) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, Col | bCol);
 		COORD position = csbiInfo.dwCursorPosition;
@@ -251,6 +251,7 @@ namespace consola
 			ColorLine(Col, bCol);
 		}
 		position.Y++;
+		position.X = 0;
 		SetConsoleCursorPosition(ConsOut, position);
 		SetConsoleTextAttribute(ConsOut, WHITE | bBLACK);
 		return Str.length() == static_cast<size_t>(Nm);
@@ -304,7 +305,7 @@ namespace Menus
 	
 	typedef std::tuple<uint8_t, std::wstring, std::function<void()>> MENU_t;
 	typedef std::vector<MENU_t> MENU_v;
-
+	/*
 	template <typename... T>
 	class MenuF
 	{
@@ -320,9 +321,9 @@ namespace Menus
 		DWORD S_consoleOptionColor = consola::ForColor::WHITE;
 		DWORD S_consoleOptionColorb = consola::BackColor::bBLACK;
 	public:
-		void add(std::tuple<T...> Tuple)
+		void add(const uint8_t Number, const std::wstring string, const std::function<Full_t> functionX, const Argument_t Values)
 		{
-			S_VectorTupleContainter.push_back(Tuple);
+			tuple.push_back(make_tuple(Number, string, functionX, Values));
 		}
 		void printOption()
 		{
@@ -387,7 +388,7 @@ namespace Menus
 		void SetConsoleErrorbackgroundColor(const int Col) { S_consoleErrorColorb = Col; }
 		void SetConsoleOptionbackgroundColor(const int Col) { S_consoleErrorColorb = Col; }
 		std::wstring GetTitle() const { return S_Title; }
-	};
+	};*/
 
 
 	template <typename Argument_t=void, typename Return_t=void, typename Full_t=Return_t(Argument_t)>
@@ -397,6 +398,7 @@ namespace Menus
 		void add(const uint8_t Number, const std::wstring string,const std::function<Full_t> functionX,const Argument_t Values)
 		{
 			this->push_back(make_tuple(Number, string, functionX, Values));
+
 		}
 		void print()
 		{
@@ -404,13 +406,13 @@ namespace Menus
 			{
 				consola::cls();
 				consola::printLn(SeparacionOp + SeparacionOp + Title, consoleTitleColor, consoleTitleColorb);
-				for (auto r : *this) {
+				for (auto &r : *this) {
 					consola::printLn(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
 				}
 				auto Failbool = false;
 
 				auto Tmp = consola::GetString();
-				for (auto a : Tmp)
+				for (auto &a : Tmp)
 				{
 					if (!isdigit(a))
 					{
@@ -426,13 +428,13 @@ namespace Menus
 				}
 				auto Op = std::stoi(Tmp);
 				auto correctOp = false;
-				for (auto r : *this) {
+				for (auto& r : *this) {
 					correctOp = false;
 					if (std::get<0>(r) == Op) {
 						consola::cls();
 						auto R = std::get<2>(r);
-						
-						R(std::get<3>(r));
+						auto Resul =std::invoke(R,std::get<3>(r));//This is gona make some problems in the future
+						ToReturn = Resul;
 						correctOp = true;
 						break;
 					}
@@ -456,8 +458,12 @@ namespace Menus
 		void SetConsoleErrorbackgroundColor(const int Col) { consoleErrorColorb = Col; }
 		void SetConsoleOptionbackgroundColor(const int Col) { consoleErrorColorb = Col; }
 		std::wstring GetTitle() const { return Title; }
+		Return_t to_return() const
+		{
+			return ToReturn;
+		}
 	protected:
-		
+		Return_t ToReturn;
 		std::wstring Title = L"Menu:";
 		std::wstring ErrorOut = L"Valor incorrecto";
 		std::wstring InicioOp = L"N.";

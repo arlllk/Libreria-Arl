@@ -2,166 +2,124 @@
 //
 #include "stdafx.h"
 #include "Arley.hpp"
-#include <random>
 #include <chrono>
-#include <vector>
-#include <utility>
-#include <algorithm>
-
 using namespace std;
 
-void mostrar_datos(vector<double> v)
-{
-	for (auto r : v)
-	{
-		consola::printLn(to_wstring(r));
-	}
-}
+void string_getter(wstring&, wstring&);
+tuple<vector<uint8_t>, int> Menu_principal(vector<wstring>);
+tuple<vector<uint8_t>, int> Menu_busqueda_a_fuerza_bruta(vector<wstring>);
+tuple<vector<uint8_t>, int> busqueda_a_fuerza_bruta_Saliendo(vector<wstring>);
+tuple<vector<uint8_t>, int> busqueda_a_fuerza_bruta_Sin_Salir(vector<wstring>);
 
-void busqueda_secuencial(tuple<vector<double>,double> Get)
+void string_getter(wstring& T, wstring& P)
 {
-	auto v = get<0>(Get);
-	auto d = get<1>(Get);
-	auto NoEsEncontrado = true;
-	for (auto a : v)
-	{
-		if (a == d)
+	while (true) {
+		consola::CenterPrint(L"Ingrese string T");
+		T = consola::GetString();
+		consola::CenterPrint(L"Ingrese string P");
+		P = consola::GetString();
+		if(T.size()>P.size())
 		{
-			NoEsEncontrado = false;
-			consola::printLn(L"El numero a buscar " + to_wstring(d) + L" a sido encontrado");
+			return;
 		}
-	}
-	if (NoEsEncontrado)
-	{
-		consola::printLn(L"El numero no ha sido encontrado");
+		consola::cls();
+		CenterPrint(L"El valor ingresado es incorrecto", consola::RED, consola::bYELLOW);
+		consola::Wait();
 	}
 }
 
-
-[[deprecated("Use std::sort is much better")]]
-void quickSort(vector<double> &Vec, int left, int right) {
-	int i = left, j = right;
-	int pivot = Vec.at((left + right) / 2);
-
-	/* partition */
-	while (i <= j) {
-		while (Vec.at(i) < pivot)
-			i++;
-		while (Vec.at(j) > pivot)
-			j--;
-		if (i <= j) {
-			int tmp = Vec.at(i);
-			Vec.at(i) = Vec.at(j);
-			Vec.at(j) = tmp;
-			i++;
-			j--;
-		}
-	};
-
-	/* recursion */
-	if (left < j)
-		quickSort(Vec, left, j);
-	if (i < right)
-		quickSort(Vec, i, right);
-}
-
-void busqueda_binaria_iterativa(const tuple<vector<double>, double> Get)
+tuple<vector<uint8_t>, int> busqueda_a_fuerza_bruta_Saliendo(vector<wstring> vStrings)
 {
-	auto v = get<0>(Get);
-	auto dato = get<1>(Get);
-	sort(v.begin(), v.end());
-	size_t Inferior = 0, Superior = v.size() - 1;
-	auto EsEncontrado = false;
-	int c = 0;
-	while (Inferior < Superior) {
-		int mitad = (Inferior + Superior) / 2;
-		if (v.at(mitad) == dato)
+	int contador = 0;
+	vector<uint8_t> indices{};
+	auto texto = vStrings.at(0);
+	auto patron = vStrings.at(1);
+	for (int i = 0; i <= texto.size() - patron.size(); i++)
+	{
+		int j;
+		for (j = 0; j < patron.size(); j++)
 		{
-			EsEncontrado = true;
-			break;
+			contador++;
+			if (texto.at(i + j) != patron.at(j))
+				break;
 		}
-		else {
-			c++;
+		if (j == patron.size())
+		{
+			indices.push_back(i);
+			return make_tuple(indices,contador);
 		}
-		if (v.at(mitad) > dato) {
-			Superior = mitad;
-			mitad = (Inferior + Superior) / 2;
-		}
-		if (v.at(mitad) < dato) {
-			Inferior = mitad;
-			mitad = (Inferior + Superior) / 2;
-		}
-	}
-	if (EsEncontrado)
-	{
-		consola::printLn(L"Entonces el numero" +to_wstring(dato)+L" ha sido encontrado");
-	}
-	else {
-		consola::printLn(L"El numero no ha sido contrado");
 	}
 }
 
-int BusquedaBinariaRecursiva(vector <double> list, int izq, int der, double val) {
-	int Medio = (izq + der) / 2;
-	if (izq > der) {
-		consola::printLn(L"No se encontro el numero buscado");
-	}
-	if (list.at(Medio) == val) {
-		consola::printLn(L"Entonces el numero" + to_wstring(val) + L" ha sido encontrado en: " + to_wstring(Medio));
-	}
-	if (list.at(Medio) < val) {
-		return BusquedaBinariaRecursiva(list, Medio + 1, der, val);
-	}
-	return BusquedaBinariaRecursiva(list, izq, Medio-1, val);
-}
-
-void BBR(tuple<vector<double>, double> Get) {
-	auto v = get<0>(Get);
-	auto Valor = get<1>(Get);
-	BusquedaBinariaRecursiva(v, 0, v.size() - 1, Valor);
-}
-
-
-void searchalorithm(vector<double> VectorToSort) {
-	Menus::Menu<tuple<vector<double>, double>> SortSelector;
-	auto Number = consola::getType<double>(L"Ingresar el numero a buscar");
-	auto send = make_tuple(VectorToSort, Number);
-	SortSelector.SetTitle(L"Seleccionar el tipo de algoritmo de busqueda");
-	SortSelector.add(1, L"Busqueda Secuencial", busqueda_secuencial, send);
-	SortSelector.add(2, L"Busqueda Binaria Itinerativa", busqueda_binaria_iterativa, send);
-	SortSelector.add(3, L"Busqueda Binaria Recursiva", BBR, send);
-	SortSelector.print();
-	consola::Wait();
-}
-
-void exitOp(vector<double> R)
+tuple<vector<uint8_t>, int> busqueda_a_fuerza_bruta_Sin_Salir(vector<wstring> vStrings)
 {
-	R.at(0) = 0;
+	int contador = 0;
+	vector<uint8_t> indices{};
+	auto texto = vStrings.at(0);
+	auto patron = vStrings.at(1);
+	for (int i = 0; i <= texto.size() - patron.size(); i++)
+	{
+		int j;
+		for (j = 0; j < patron.size(); j++)
+		{
+			contador++;
+			if (texto.at(i + j) != patron.at(j))
+				break;
+		}
+		if (j == patron.size())
+		{
+
+			indices.push_back(i);
+		}
+	}
+	return make_tuple(indices, contador);
+}
+
+tuple<vector<uint8_t>, int> Menu_busqueda_a_fuerza_bruta(vector<wstring> vStrings)
+{
+	//tuple<vector<uint8_t>, int> Regreso;
+	Menus::Menu<vector<wstring>, tuple<vector<uint8_t>, int>> brut_menu;
+	brut_menu.SetTitle(L"Cual de los dos estilos de fuerza bruta desea");
+	brut_menu.add(1, L"Busqueda a fuerza bruta que sale a la primera", busqueda_a_fuerza_bruta_Saliendo, vStrings);
+	brut_menu.add(2, L"Busqueda a fuerza bruta que busca todas las ocurrencias", busqueda_a_fuerza_bruta_Sin_Salir, vStrings);
+	brut_menu.add(0, L"Retroceder", Menu_principal, vStrings);
+	brut_menu.print();
+	return brut_menu.to_return();
+}
+
+tuple<vector<uint8_t>, int> Menu_principal(vector<wstring> vStrings)
+{
+	//tuple<vector<uint8_t>, int> Regreso;
+	Menus::Menu<vector<wstring>, tuple<vector<uint8_t>, int>> MainMenu;
+	MainMenu.SetTitle(L"SELECCIONE EL METODO DE BUSQUEDA");
+	MainMenu.add(1, L"A fuerza bruta", Menu_busqueda_a_fuerza_bruta, vStrings);
+	MainMenu.print();
+	return MainMenu.to_return();
+
 }
 
 int main()
 {
-	vector<double> Vec, F{1,1};
+	wstring T, P;
 	consola::InitConsole();
-	const auto a = consola::getType<int>(L"Ingrese cantidad de numeros aleatorios a generar");
-	Vec.resize(a);
-	auto LI = consola::getType<int>(L"Ingrese limite inferior");
-	auto LS = consola::getType<int>(L"Ingrese limite superior");
-	unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-	std::mt19937 generator(seed1);
-	for (auto &a1 : Vec) {
-		a1 = LI + (generator() % (LS - LI));
-	}
+	//Start code bellow
+	string_getter(T, P);
+	vector<wstring> Strings_T_P{T,P};
 	consola::cls();
-	HI:
-	do
+	auto Regreso = Menu_principal(Strings_T_P);
+	auto Indices =get<0>(Regreso);
+	auto Conteo = get<1>(Regreso);
+
+	if (Indices.empty())
 	{
-		Menus::Menu<vector<double>> men1;
-		men1.SetTitle(L"BIENVENIDO AL MENU DE ORDENAMIENTO");
-		men1.add(1, L"MOSTRAR ELEMENTOS ALEATORIOS GENERADOS", mostrar_datos, Vec);
-		men1.add(2, L"METODO DE BUSQUEDA", searchalorithm, Vec);
-		men1.add(3, L"Salir", exitOp, F);
-		men1.print();
-		consola::Wait();
-	} while (F.at(0));
+		consola::printLn(L"No se encontro el patron");
+	}else
+	{
+		for(auto a: Indices)
+		{
+			consola::printLn(L"Patron encontrado en el indice " + to_wstring(a));
+		}
+	}
+	consola::printLn(L"El numero de comparaciones hechas fue de: " + to_wstring(Conteo));
+	consola::Wait();
 }
