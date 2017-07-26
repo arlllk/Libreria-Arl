@@ -1,4 +1,4 @@
-#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
 
 #IncludeRegexScan: ^.*$
 
@@ -19,12 +19,92 @@ vector
 -
 iostream
 -
+cstdint
+-
+any
+-
+gsl/gsl.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl.h
 
 C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/TCP.cpp
 stdafx.h
 C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.h
 Arley.hpp
 C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/Arley.hpp
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl.h
+gsl_assert.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_assert.h
+gsl_util.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_util.h
+span.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/span.h
+string_span.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/string_span.h
+memory
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_assert.h
+exception
+-
+stdexcept
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_util.h
+gsl_assert.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_assert.h
+array
+-
+utility
+-
+type_traits
+-
+exception
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/span.h
+gsl_assert.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_assert.h
+gsl_util.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_util.h
+algorithm
+-
+array
+-
+cassert
+-
+cstddef
+-
+cstdint
+-
+functional
+-
+iterator
+-
+limits
+-
+new
+-
+numeric
+-
+stdexcept
+-
+type_traits
+-
+utility
+-
+
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/string_span.h
+gsl_assert.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_assert.h
+gsl_util.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/gsl_util.h
+span.h
+C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/gsl/span.h
+cstring
+-
+string
+-
 
 C:/Users/arllk/Documents/Visual Studio 2017/Projects/TCP/TCP/stdafx.cpp
 stdafx.h

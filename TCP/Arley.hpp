@@ -1,19 +1,24 @@
+#ifndef ARLEY_ARLEY_HPP
+#define ARLEY_ARLEY_HPP
+#ifdef _MSC_VER
 #pragma once
-#if defined (_MSC_VER)
-	#include "stdafx.h"
-#endif
-#define NOMINMAX
+#include "stdafx.h"
+#endif  // _MSC_VER
+
+#define NOMINMAX //Disable Max an Min in MSC
 #include <Windows.h>
 #include <string>
 #include <functional>
 #include <vector>
 #include <iostream>
 #include <cstdint>
-#include <any>
+#include <type_traits>
+#include <typeinfo>
 
 #if (__cplusplus < 201402L)
 //static_assert(false, "Se necesita usar el C++17 para este header");
 #endif
+
 /**
  * \brief Namespace para funciones usadas para consola de Windows
  */
@@ -65,11 +70,11 @@ namespace consola
 
 	bool printLn(const std::wstring Str = L"\n", const WORD col = WHITE, const WORD bCol = bBLACK);
 
-	bool printLn(std::string Str ="\n", WORD col = WHITE, WORD bCol = bBLACK);
+	bool printLn(std::string Str = "\n", WORD col = WHITE, WORD bCol = bBLACK);
 
 	bool SetTitle(const std::wstring);
 
-	void cls(const WORD Col = WHITE,const  WORD bCol = bBLACK);
+	void cls(const WORD Col = WHITE, const  WORD bCol = bBLACK);
 
 	void Goto(const short, const short);
 
@@ -81,7 +86,7 @@ namespace consola
 
 	std::wstring GetString();
 
-	bool CenterPrint(const std::wstring , const WORD , const WORD ,const bool);
+	bool CenterPrint(const std::wstring, const WORD, const WORD, const bool);
 
 	inline void InitConsole()
 	{
@@ -94,12 +99,12 @@ namespace consola
 	{
 		std::wstring regreso;
 		std::wcin >> regreso;
-		std::wcin.ignore(LLONG_MAX, '\n');
+		std::wcin.ignore(std::numeric_limits<long long>::max(), '\n');
 		return regreso;
 	}
 
 	template< typename T>
-	T getType (const std::wstring Pedido, const T minVal = std::numeric_limits<T>::lowest(), const T maxVal = std::numeric_limits<T>::max(), const std::wstring Error = L"El valor ingresado no es correcto"){
+	T getType(const std::wstring Pedido, const T minVal = std::numeric_limits<T>::lowest(), const T maxVal = std::numeric_limits<T>::max(), const std::wstring Error = L"El valor ingresado no es correcto") {
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
 		std::wstring Ingreso;
 		while (true)
@@ -110,12 +115,17 @@ namespace consola
 			for (wchar_t a : Ingreso)
 			{
 				auto check = static_cast<unsigned char>(a);
-				if (!(isdigit(check) ||a == L'.'|| a==L','))
+				if (!(isdigit(check) || a == L'.' || a == L','))
 				{
 					printLn(Error, RED);
-					printLn(std::to_wstring(a) + std::wstring(L" No es un digito"), RED);		//Now only a ugly one
+					printLn(std::to_wstring(check) + std::wstring(L" No es un digito"), RED);		//Now only a ugly one
 					fl = true;
 				}
+			}
+			if (fl)
+			{
+				Wait();
+				continue;
 			}
 			auto Number = std::stof(Ingreso);
 			if (Number<minVal || Number>maxVal)
@@ -126,6 +136,7 @@ namespace consola
 			}
 			if (fl)
 			{
+				Wait();
 				continue;
 			}
 			break;
@@ -133,8 +144,8 @@ namespace consola
 		return static_cast<T>(stold(Ingreso));
 	}
 
-	[[deprecated("replaced by getType, much better template code")]]
-	inline long double GetNumber(const std::wstring Pedido, const std::wstring Error=L"El valor ingresado no es correcto")
+	[[deprecated("replaced by getType, templatic code, better ")]]
+	inline long double GetNumber(const std::wstring Pedido, const std::wstring Error = L"El valor ingresado no es correcto")
 	{
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
 		std::wstring Ingreso;
@@ -143,12 +154,12 @@ namespace consola
 			cls();
 			printLn(Pedido);
 			Ingreso = GetString();
-			for (wchar_t a: Ingreso)
+			for (wchar_t a : Ingreso)
 			{
-				if (!(isdigit(a)||(a==L'.')))
+				if (!(isdigit(a) || (a == L'.')))
 				{
-					printLn(Error,RED);
-					printLn(std::to_wstring(a)+std::wstring(L" No es un digito"),RED);		//Now only a ugly one
+					printLn(Error, RED);
+					printLn(std::to_wstring(a) + std::wstring(L" No es un digito"), RED);		//Now only a ugly one
 					fl = true;
 				}
 			}
@@ -161,9 +172,8 @@ namespace consola
 		return std::stold(Ingreso);
 	}
 
-	inline float GetNumberRanged(const std::wstring Pedido, const float minVal= -FLT_MAX, const float maxVal = FLT_MAX, const std::wstring Error= L"El valor ingresado no es correcto")
+	inline float GetNumberRanged(const std::wstring Pedido, const float minVal = -FLT_MAX, const float maxVal = FLT_MAX, const std::wstring Error = L"El valor ingresado no es correcto")
 	{
-		
 		auto fl = false; //Flag that is set to let the loop finish when the conditions are given
 		std::wstring Ingreso;
 		while (true)
@@ -181,7 +191,7 @@ namespace consola
 				}
 			}
 			float Number = std::stof(Ingreso);
-			if (Number<minVal||Number>maxVal)
+			if (Number<minVal || Number>maxVal)
 			{
 				printLn(Error, RED);
 				printLn(std::to_wstring(Number) + std::wstring(L"Esta fuera del rango de ") + std::to_wstring(minVal) + std::wstring(L" A ") + std::to_wstring(maxVal));
@@ -196,15 +206,14 @@ namespace consola
 		return std::stof(Ingreso);
 	}
 
-
 	inline bool SetUnicode() {
 		return SetConsoleOutputCP(CP_UTF8);
 	}
 
-	inline bool printLn(std::string Str,  WORD col,  WORD bCol)
+	inline bool printLn(std::string Str, WORD col, WORD bCol)
 	{
 		std::wstring wStr(Str.begin(), Str.end());
-		return printLn(wStr,col,bCol);
+		return printLn(wStr, col, bCol);
 	}
 
 	inline bool printLn(const std::wstring Str, const WORD col, const WORD bCol) {
@@ -227,13 +236,13 @@ namespace consola
 		WriteConsoleW(ConsOut, Str.c_str(), static_cast<DWORD>(Str.length()), &Nm, nullptr);
 		return Str.length() == static_cast<size_t>(Nm);
 	}
-	inline bool CenterPrint(const std::wstring Str, const WORD Col, const WORD bCol, const bool colorization=true) {
+	inline bool CenterPrint(const std::wstring Str, const WORD Col, const WORD bCol, const bool colorization = true) {
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		SetConsoleTextAttribute(ConsOut, Col | bCol);
 		COORD position = csbiInfo.dwCursorPosition;
 		COORD ConSize = csbiInfo.dwSize;
 		DWORD Nm = 0;
-		size_t StrSize=Str.size();
+		size_t StrSize = Str.size();
 		position.X = ConSize.X / 2 - (StrSize / 2);
 		SetConsoleCursorPosition(ConsOut, position);
 		WriteConsoleW(ConsOut, Str.c_str(), Str.length(), &Nm, nullptr);
@@ -247,7 +256,7 @@ namespace consola
 		return Str.length() == static_cast<size_t>(Nm);
 	}
 
-	inline bool ColorLine(const WORD Col,const WORD bCol)
+	inline bool ColorLine(const WORD Col, const WORD bCol)
 	{
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
 		auto position = csbiInfo.dwCursorPosition;
@@ -266,7 +275,7 @@ namespace consola
 		return (SetConsoleTitleW(Titulo.c_str()));
 	}
 
-	inline void cls(const WORD Col,const WORD bCol) {
+	inline void cls(const WORD Col, const WORD bCol) {
 		COORD coordScreen = { 0, 0 };
 		DWORD cCharsWritten;
 		GetConsoleScreenBufferInfo(ConsOut, &csbiInfo);
@@ -277,29 +286,117 @@ namespace consola
 		SetConsoleCursorPosition(ConsOut, coordScreen);
 	}
 
-	inline void Goto(const short X,const short Y) {
+	inline void Goto(const short X, const short Y) {
 		COORD N; N.X = X; N.Y = Y;
 		SetConsoleCursorPosition(ConsOut, N);
 	}
 	inline void Wait() {
-		std::wcin.ignore(INT_MAX, '\n');
+		std::wcin.ignore(std::numeric_limits<long long>::max(), '\n');
 		//getchar();
 		//std::wcin.get();
 	}
-	
-	
 }
+
+
 
 namespace Menus
 {
+	
 	typedef std::tuple<uint8_t, std::wstring, std::function<void()>> MENU_t;
 	typedef std::vector<MENU_t> MENU_v;
-	template <typename... Ts>
-	class Menu : protected std::vector<std::tuple<uint8_t, std::wstring, std::function<void(Ts...)>>> {
+
+	template <typename... T>
+	class MenuF
+	{
+		std::vector<std::tuple<T...>> S_VectorTupleContainter;
+		std::wstring S_Title = L"Menu:";
+		std::wstring S_ErrorOut = L"Valor incorrecto";
+		std::wstring S_InicioOp = L"N.";
+		std::wstring S_SeparacionOp = L"\t";
+		DWORD S_consoleTitleColor = consola::ForColor::RED;
+		DWORD S_consoleTitleColorb = consola::BackColor::bBLACK;
+		DWORD S_consoleErrorColor = consola::ForColor::RED;
+		DWORD S_consoleErrorColorb = consola::BackColor::bBLACK;
+		DWORD S_consoleOptionColor = consola::ForColor::WHITE;
+		DWORD S_consoleOptionColorb = consola::BackColor::bBLACK;
 	public:
-		void add(const uint8_t Number, const std::wstring string, const std::function<void(Ts...)> functionX)
+		void add(std::tuple<T...> Tuple)
 		{
-			this->push_back(make_tuple(Number, string, functionX));
+			S_VectorTupleContainter.push_back(Tuple);
+		}
+		void printOption()
+		{
+			consola::cls();
+			consola::printLn(S_SeparacionOp + S_SeparacionOp + S_Title, S_consoleTitleColor, S_consoleTitleColorb);
+			for (std::tuple<T...> r : S_VectorTupleContainter) {
+				consola::printLn(S_InicioOp + std::to_wstring(std::get<0>(r)) + S_SeparacionOp + std::to_wstring(std::get<1>(r)), S_consoleOptionColor, S_consoleOptionColorb);
+			}
+		}
+		bool IsValidNumber(const std::wstring stringToValidate)
+		{
+			for (auto a : stringToValidate)
+			{
+				if (!isdigit(a))
+				{
+					consola::printLn(S_ErrorOut, S_consoleErrorColor, S_consoleErrorColorb);
+					consola::printLn(L"No es un numero correcto", S_consoleErrorColor, S_consoleErrorColorb);
+					consola::Wait();
+					return false;
+				}
+			}
+			auto Op = stoi(stringToValidate);
+			for (std::tuple<T...> r : S_VectorTupleContainter) {
+				if (std::get<0>(r) == Op) {
+					return true;
+				}
+			}
+				consola::printLn(S_ErrorOut, S_consoleErrorColor, S_consoleErrorColorb);
+				consola::Wait();
+				return false;
+		}
+		uint8_t selector()
+		{
+			std::wstring ConsoleInput;
+			do {
+				printOption();
+				ConsoleInput = consola::GetString();
+			} while (IsValidNumber(ConsoleInput));
+			return stoi(ConsoleInput);
+		}
+		void Selector_Screen()
+		{
+			for (std::tuple<T...> r : S_VectorTupleContainter) {
+				for (int i = 0; i < std::tuple_size<decltype(r)>::value; i++)
+				{
+					if (std::is_same<std::tuple_element<i, r>::type, std::function>())
+					{
+						std::get<i>(r)();
+					}
+				}
+				consola::printLn(L"ESTO ESTA MAL WE");
+			}
+		}
+		void SetTitle(const std::wstring text) { S_Title = text + L":"; }
+		void SetError(const std::wstring text) { S_ErrorOut = text; }
+		void SetInicioOption(const std::wstring text) { S_InicioOp = text; }
+		void SetSeparatorOption(const std::wstring text) { S_SeparacionOp = text; }
+		void SetConsoleTitleColor(const int Col) { S_consoleTitleColor = Col; }
+		void SetConsoleErrorColor(const int Col) { S_consoleErrorColor = Col; }
+		void SetConsoleOptionColor(const int Col) { S_consoleOptionColor = Col; }
+		void SetConsoleTitlebackgroundColor(const int Col) { S_consoleTitleColorb = Col; }
+		void SetConsoleErrorbackgroundColor(const int Col) { S_consoleErrorColorb = Col; }
+		void SetConsoleOptionbackgroundColor(const int Col) { S_consoleErrorColorb = Col; }
+		std::wstring GetTitle() const { return S_Title; }
+	};
+
+
+	template <typename Argument_t=void, typename Return_t=void, typename Full_t=Return_t(Argument_t)>
+	class Menu : protected std::vector<std::tuple<uint8_t, std::wstring, std::function<Full_t>, Argument_t>> {
+	public: 
+		typedef Argument_t Arg;
+		void add(const uint8_t Number, const std::wstring string,const std::function<Full_t> functionX,const Argument_t Values)
+		{
+			this->push_back(make_tuple(Number, string, functionX, Values));
 		}
 		void print()
 		{
@@ -310,10 +407,9 @@ namespace Menus
 				for (auto r : *this) {
 					consola::printLn(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
 				}
-				std::wstring Tmp;
-				bool Failbool = false;
+				auto Failbool = false;
 
-				Tmp = consola::GetString();
+				auto Tmp = consola::GetString();
 				for (auto a : Tmp)
 				{
 					if (!isdigit(a))
@@ -328,13 +424,15 @@ namespace Menus
 				{
 					continue;
 				}
-				int Op = stoi(Tmp);
-				bool correctOp = false;
+				auto Op = std::stoi(Tmp);
+				auto correctOp = false;
 				for (auto r : *this) {
 					correctOp = false;
 					if (std::get<0>(r) == Op) {
 						consola::cls();
-						std::get<2>(r)();
+						auto R = std::get<2>(r);
+						
+						R(std::get<3>(r));
 						correctOp = true;
 						break;
 					}
@@ -357,8 +455,9 @@ namespace Menus
 		void SetConsoleTitlebackgroundColor(const int Col) { consoleTitleColorb = Col; }
 		void SetConsoleErrorbackgroundColor(const int Col) { consoleErrorColorb = Col; }
 		void SetConsoleOptionbackgroundColor(const int Col) { consoleErrorColorb = Col; }
-		std::wstring GetTitle() { return Title; }
+		std::wstring GetTitle() const { return Title; }
 	protected:
+		
 		std::wstring Title = L"Menu:";
 		std::wstring ErrorOut = L"Valor incorrecto";
 		std::wstring InicioOp = L"N.";
@@ -371,12 +470,12 @@ namespace Menus
 		DWORD consoleOptionColorb = consola::BackColor::bBLACK;
 	};
 
-	template <typename... Ts>
-	class Pantalla: protected Menu<Ts...>
+	template <typename T>
+	class Pantalla : protected Menu<T>
 	{
 	public:
 		void SetTitle(const std::wstring text) { Title = text; }
-		void print(const bool center=false)
+		void print(const bool center = false)
 		{
 			while (true)
 			{
@@ -391,7 +490,8 @@ namespace Menus
 					for (auto r : *this) {
 						consola::CenterPrint(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
 					}
-				}else{
+				}
+				else {
 					for (auto r : *this) {
 						consola::printLn(InicioOp + std::to_wstring(std::get<0>(r)) + SeparacionOp + std::get<1>(r), consoleOptionColor, consoleOptionColorb);
 					}
@@ -406,7 +506,7 @@ namespace Menus
 					{
 						if (!isdigit(a))
 						{
-							consola::CenterPrint(ErrorOut, consoleErrorColor, consoleErrorColorb );
+							consola::CenterPrint(ErrorOut, consoleErrorColor, consoleErrorColorb);
 							consola::CenterPrint(L"No es un numero correcto", consoleErrorColor, consoleErrorColorb);
 							consola::Wait();
 							Failbool = true;
@@ -456,3 +556,5 @@ namespace Menus
 		DWORD consoleErrorColorb = consola::BackColor::bRED;
 	};
 }
+
+#endif //ARLEY_ARLEY_HPP
