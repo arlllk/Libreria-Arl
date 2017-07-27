@@ -5,6 +5,13 @@
 #include "stdafx.h"
 #endif  // _MSC_VER
 
+#if defined(UNICODE) && !defined(_UNICODE)
+#define _UNICODE
+#elif defined(_UNICODE) && !defined(UNICODE)
+#define UNICODE
+#endif //UNICODE
+
+
 #define NOMINMAX //Disable Max an Min in MSC
 #include <Windows.h>
 #include <string>
@@ -13,7 +20,7 @@
 #include <iostream>
 #include <cstdint>
 #include <type_traits>
-#include <typeinfo>
+
 
 #if (__cplusplus < 201402L)
 //static_assert(false, "Se necesita usar el C++17 para este header");
@@ -98,8 +105,8 @@ namespace consola
 	inline std::wstring GetString()
 	{
 		std::wstring regreso;
-		std::wcin >> regreso;
-		std::wcin.ignore(std::numeric_limits<long long>::max(), '\n');
+		const wchar_t Limiter = L'\n';
+		std::getline(std::wcin,regreso,Limiter);
 		return regreso;
 	}
 
@@ -412,6 +419,10 @@ namespace Menus
 				auto Failbool = false;
 
 				auto Tmp = consola::GetString();
+				if (Tmp==L"")
+				{
+					continue;
+				}
 				for (auto &a : Tmp)
 				{
 					if (!isdigit(a))
